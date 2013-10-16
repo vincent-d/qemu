@@ -28,9 +28,9 @@ typedef struct {
 } USBCinergyState;
 
 enum {
-    STR_SERIALNUMBER = 1,
-    STR_MANUFACTURER,
+    STR_MANUFACTURER = 1,
     STR_PRODUCT,
+    STR_SERIALNUMBER,
 };
 
 static const USBDescStrings desc_strings = {
@@ -39,10 +39,10 @@ static const USBDescStrings desc_strings = {
     [STR_SERIALNUMBER]    = "1",
 };
 
-static const USBDescIface desc_iface0 = {
+static const USBDescIface desc_iface = {
     .bInterfaceNumber              = 0,
     .bNumEndpoints                 = 3,
-    .bInterfaceClass               = USB_CLASS_VENDOR_SPEC,
+    .bInterfaceClass               = 0xff, //USB_CLASS_VENDOR_SPEC
     .bInterfaceSubClass            = 0xff,
     .bInterfaceProtocol            = 0x00,
     .eps = (USBDescEndpoint[]) {
@@ -71,9 +71,9 @@ static const USBDescDevice desc_device = {
             .bNumInterfaces        = 1,
             .bConfigurationValue   = 1,
             .bmAttributes          = 0x80,
-            .bMaxPower             = 238,
+            .bMaxPower             = 40, //238
             .nif = 1,
-            .ifs = &desc_iface0,
+            .ifs = &desc_iface,
         },
     },
 };
@@ -123,7 +123,28 @@ static int usb_cinergy_initfn(USBDevice *dev)
 
 static void usb_cinergy_handle_reset(USBDevice *dev)
 {
+	DPRINTF("cinergy handle reset\n");
     return;
+}
+
+static void usb_cinergy_handle_control(USBDevice *dev, USBPacket *p,
+               int request, int value, int index, int length, uint8_t *data)
+{
+	//USBCinergyState *s = (USBCinergyState *)dev;
+    int ret;
+
+    DPRINTF("got control %x, value %x\n",request, value);
+    ret = usb_desc_handle_control(dev, p, request, value, index, length, data);
+    if (ret >= 0) {
+        return;
+    }
+    return;
+}
+
+static void usb_cinergy_handle_data(USBDevice *dev, USBPacket *p)
+{
+	DPRINTF("cinergy handle data\n");
+	return;
 }
 
 static const VMStateDescription vmstate_usb_cinergy = {
@@ -140,13 +161,14 @@ static void usb_cinergy_class_initfn(ObjectClass *klass, void *data)
     uc->product_desc   = "QEMU USB CinergyT2";
     uc->usb_desc       = &desc_cinergy;
     uc->handle_reset   = usb_cinergy_handle_reset;
-    //uc->handle_control = usb_serial_handle_control;
-    //uc->handle_data    = usb_serial_handle_data;
+    uc->handle_control = usb_cinergy_handle_control;
+    uc->handle_data    = usb_cinergy_handle_data;
     dc->desc           = "QEMU USB CinergyT2";
     dc->vmsd           = &vmstate_usb_cinergy;
     //dc->props = serial_properties;
     set_bit(DEVICE_CATEGORY_USB, dc->categories);
-    
+	
+	DPRINTF("cinergy device init done\n");    
 }
     
 static const TypeInfo cinergy_info = {
