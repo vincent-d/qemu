@@ -499,12 +499,15 @@ void usb_desc_init(USBDevice *dev)
     dev->speed = USB_SPEED_FULL;
     dev->speedmask = 0;
     if (desc->full) {
+        dev->speed = USB_SPEED_FULL;
         dev->speedmask |= USB_SPEED_MASK_FULL;
     }
     if (desc->high) {
+        dev->speed = USB_SPEED_HIGH;
         dev->speedmask |= USB_SPEED_MASK_HIGH;
     }
     if (desc->super) {
+        dev->speed = USB_SPEED_SUPER;
         dev->speedmask |= USB_SPEED_MASK_SUPER;
     }
     usb_desc_setdefaults(dev);
