@@ -11,7 +11,7 @@
 #include "hw/usb/desc.h"
 #include "sysemu/char.h"
 
-#define DEBUG_Cinergy
+//#define DEBUG_Cinergy
 
 #ifdef DEBUG_Cinergy
 #define DPRINTF(fmt, ...) \
@@ -71,7 +71,7 @@ static const USBDescDevice desc_device = {
             .bNumInterfaces        = 1,
             .bConfigurationValue   = 1,
             .bmAttributes          = 0x80,
-            .bMaxPower             = 40, //238
+            .bMaxPower             = 238,
             .nif = 1,
             .ifs = &desc_iface,
         },
@@ -87,7 +87,7 @@ static const USBDesc desc_cinergy = {
         .iProduct          = STR_PRODUCT,
         .iSerialNumber     = STR_SERIALNUMBER,
     },
-    .full = &desc_device,
+    .high = &desc_device,
     .str  = desc_strings,
 };
 
@@ -144,6 +144,7 @@ static void usb_cinergy_handle_control(USBDevice *dev, USBPacket *p,
 static void usb_cinergy_handle_data(USBDevice *dev, USBPacket *p)
 {
 	DPRINTF("cinergy handle data\n");
+    DPRINTF("pid %x\n", p->pid);
 	return;
 }
 
